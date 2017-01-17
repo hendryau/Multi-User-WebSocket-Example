@@ -1,0 +1,41 @@
+body {
+    font-family: Verdana, Geneva, sans-serif;
+    text-align: center;
+}
+
+button, data {
+    border-radius: 26px;
+    border: 1px solid #a8a8a8;
+}
+
+button {
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    margin: .5em 0em .5em 0em;
+    cursor: pointer;
+    color: #a8a8a8;
+    background-color: transparent;
+}
+button:hover {
+    color: grey;
+}
+
+data {
+    padding: 15px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px;
+}
+data > div {
+    display: table-row;
+}
+data input, data label {
+    display: table-cell;
+    padding: 5px;
+    margin-bottom: 5px;
+    text-align: left;
+}
+root > button {
+    display: block;
+    margin: 0 auto;
+}

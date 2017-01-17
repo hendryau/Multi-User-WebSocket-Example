@@ -1,44 +1,37 @@
-import {Component, OnInit} from "@angular/core";
+import {Component} from "@angular/core";
+import {Data, CreateCmd, GetAllCmd, CmdUtil, Command} from "../command";
+import {WebSocketService} from "../services/web-socket.service";
 
 @Component({
     selector: "root",
     template: `
-        <button [disabled]="!channelOpen" (click)="ping()">ping server</button>
-        {{lastMsg || 'Server has not said anything yet.'}}
+        <button (click)="createData()">New</button>
+        <data *ngFor="let data of dataArr" [data]="data"></data>
     `
 })
-export class RootComponent implements OnInit {
+export class RootComponent {
 
-    private channelOpen: boolean = false;
+    private dataArr: Data[] = [];
 
-    private lastMsg: string;
+    constructor(private webSocketService: WebSocketService) {
+        this.webSocketService.onMessage().subscribe((msgEvt: MessageEvent) => {
+            let cmdJson: any = JSON.parse(msgEvt.data);
+            let cmd: Command = CmdUtil.fromJson(cmdJson);
+            cmd.execute(this.dataArr);
+        });
 
-    private channel: WebSocket;
-
-    public ngOnInit(): void {
-        this.channel = new WebSocket("ws://localhost:4080");
-
-        this.channel.onopen = () => {
-            console.log("Opened WebSocket channel with server.");
-        };
-        this.channel.onerror = (err) => {
-            console.log("Something went wrong...", err.message);
-        };
-        this.channel.onmessage = (msgEvt: MessageEvent): any => {
-            this.lastMsg = msgEvt.data;
-
-            if (!this.channelOpen) {
-                this.channel.send("Root component has loaded!");
-
-                this.channelOpen = true;
-
-                return;
-            }
-        };
+        this.webSocketService.onOpen().subscribe(
+            () => this.webSocketService.send(JSON.stringify(new GetAllCmd(this.dataArr)))
+        );
     }
 
-    private ping(): void {
-        this.channel.send("Pinging you :)");
+    private createData(): void {
+        let data: any = {
+            name: "New Data",
+            id: -1
+        };
+
+        this.webSocketService.send(JSON.stringify(new CreateCmd(data)));
     }
 
 }

@@ -1,30 +1,68 @@
-(() => {
-    var server = require("http").createServer(),
-        WebSocketServer = require("ws").Server,
-        wss = new WebSocketServer({server: server}),
-        express = require("express"),
-        app = express(),
-        port = 4080;
+import {Data, CmdUtil, MOCKED_DATA, Command, CreateCmd} from "./app/command";
 
-    app.use(express.static(__dirname));
+class WebSocketServerWrapper {
 
-    let globalMsgCount: number = 0;
+    constructor() {
+        let server = require("http").createServer(),
+            WebSocketServer = require("ws").Server,
+            express = require("express"),
+            app = express(),
+            port = 4080;
 
-    wss.on("connection", (ws: any) => {
-        let msgCount: number = 0;
+        this.initWss(new WebSocketServer({server: server, perMessageDeflate: true}));
 
-        ws.on("message", (message: any) => {
-            console.log("received: %s", message);
+        app.use(express.static(__dirname));
+        server.on("request", app);
+        server.listen(port, () => console.log("Listening on " + server.address().port + "..."));
+    }
 
-            let msg: string = "I've received " + msgCount++ + " messages from you. I've received " + globalMsgCount++ + " total messages." ;
+    private sockets: any[] = [];
 
-            ws.send(msg);
+    private dataArr: Data[] = MOCKED_DATA;
+
+    private idCounter: number = this.dataArr.length - 1;
+
+    private initWss(wss: any): void {
+        wss.on("connection", (ws: any) => {
+            console.log("Socket opened.", this.sockets.length+1, "open WebSockets.");
+            this.initSocket(ws);
+        });
+    }
+
+    private initSocket(ws: any): void {
+        this.sockets.push(ws);
+
+        ws.on("close", () => {
+            console.log("Socket closed.", this.sockets.length, "open WebSockets.");
+            this.sockets.splice(this.sockets.indexOf(ws), 1);
         });
 
-        ws.send("Hello, this channel is open.");
-    });
+        ws.on("message", (msg: any) => {
+            console.log(msg);
 
-    server.on("request", app);
+            let cmdJson: any = JSON.parse(msg);
 
-    server.listen(port, () => console.log("Listening on " + server.address().port));
-})();
+            let cmd: Command = CmdUtil.fromJson(cmdJson);
+
+            if (cmd.cmdType === "GET_ALL") {
+               this.dataArr.forEach(d => {
+                   ws.send(JSON.stringify(new CreateCmd(d)))
+               });
+               return;
+            }
+
+            if (cmd.cmdType === "CREATE") {
+                cmd.data.id = this.idCounter++;
+            }
+
+            cmd.execute(this.dataArr);
+
+            this.sockets.forEach(socket => {
+                socket.send(JSON.stringify(cmd));
+            });
+        });
+    }
+
+}
+
+(() => new WebSocketServerWrapper())();
