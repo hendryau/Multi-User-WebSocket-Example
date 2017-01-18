@@ -7,7 +7,7 @@ class WebSocketServerWrapper {
             WebSocketServer = require("ws").Server,
             express = require("express"),
             app = express(),
-            port = 4080;
+            port = 1502;
 
         this.initWss(new WebSocketServer({server: server, perMessageDeflate: true}));
 
