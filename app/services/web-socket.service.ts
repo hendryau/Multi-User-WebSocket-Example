@@ -1,11 +1,10 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs/Rx";
 
-
 @Injectable()
 export class WebSocketService {
 
-    private static socket: WebSocket = new WebSocket("ws://192.168.1.68:4080");
+    private static socket: WebSocket = new WebSocket("ws://localhost:4080"); // TODO config it
 
     private static onOpenObs: Observable<any> = Observable.fromEvent(WebSocketService.socket, "open");
 

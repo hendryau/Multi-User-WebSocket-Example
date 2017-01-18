@@ -20,7 +20,7 @@ class WebSocketServerWrapper {
 
     private dataArr: Data[] = MOCKED_DATA;
 
-    private idCounter: number = this.dataArr.length - 1;
+    private idCounter: number = this.dataArr.length;
 
     private initWss(wss: any): void {
         wss.on("connection", (ws: any) => {
@@ -44,13 +44,6 @@ class WebSocketServerWrapper {
 
             let cmd: Command = CmdUtil.fromJson(cmdJson);
 
-            if (cmd.cmdType === "GET_ALL") {
-               this.dataArr.forEach(d => {
-                   ws.send(JSON.stringify(new CreateCmd(d)))
-               });
-               return;
-            }
-
             if (cmd.cmdType === "CREATE") {
                 cmd.data.id = this.idCounter++;
             }
@@ -60,6 +53,10 @@ class WebSocketServerWrapper {
             this.sockets.forEach(socket => {
                 socket.send(JSON.stringify(cmd));
             });
+        });
+
+        this.dataArr.forEach(d => {
+            ws.send(JSON.stringify(new CreateCmd(d)))
         });
     }
 

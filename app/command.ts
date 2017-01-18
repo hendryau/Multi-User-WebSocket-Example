@@ -47,19 +47,6 @@ export class UpdateCmd implements Command {
 
 }
 
-export class GetAllCmd implements Command {
-
-    constructor(public data: Data[]) { }
-
-    public cmdType: string = "GET_ALL";
-
-    public execute(dataArr: Data[]) {
-        dataArr.length = 0;
-        this.data.forEach( d => dataArr.push(d));
-    }
-
-}
-
 export class CmdUtil {
 
     public static fromJson(json: { cmdType: string, data: any}): Command {
@@ -70,10 +57,8 @@ export class CmdUtil {
                 return new DeleteCmd(json.data);
             case ("UPDATE"):
                 return new UpdateCmd(json.data);
-            case ("GET_ALL"):
-                return new GetAllCmd(json.data);
             default:
-                throw new Error("Unknown command type");
+                throw new Error("Unknown command type " + json.cmdType + ".");
         }
     }
 

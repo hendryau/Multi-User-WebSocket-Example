@@ -1,37 +1,35 @@
-import {Component, Input, OnChanges} from "@angular/core";
+import {Component, Input} from "@angular/core";
 import {Data, DeleteCmd, UpdateCmd} from "../command";
 import {WebSocketService} from "../services/web-socket.service";
 
 @Component({
     selector: "data",
     template: `
-        <div *ngFor="let k of dataKeys">
-            <label>{{k}}:</label>
-            <input type="text" [(ngModel)]="data[k]" (ngModelChange)="updateData()">
-        </div>
+        <label>id: {{data.id}}</label>
+        
+        <form (ngSubmit)="addField()">
+            <input name="newField" type="text" [(ngModel)]="newField" placeholder="field name">
+            <button type="submit">Add Field</button>
+        </form>
         
         <button (click)="deleteData()">Delete</button>
         
-        <form (ngSubmit)="addField()">
-            <input name="newField" type="text" [(ngModel)]="newField" required pattern="^[a-zA-Z]+$">
-            <button type="submit">Add Field</button>
-        </form>
+        <div *ngFor="let k of getDataKeys()">
+            <label>{{k}}:</label>
+            <input type="text" [(ngModel)]="data[k]" (ngModelChange)="updateData()">
+        </div>
     `
 })
-export class DataComponent implements OnChanges {
+export class DataComponent {
 
     constructor(private webSocketService: WebSocketService) { }
 
     @Input() private data: Data;
 
-    private dataKeys: string[] = [];
-
     private newField: string;
 
-    public ngOnChanges(): void {
-        Object.keys(this.data).forEach(k => {
-           if (k !== "id") this.dataKeys.push(k);
-        });
+    public getDataKeys(): string[] {
+        return Object.keys(this.data || {}).filter(k => k != "id");
     }
 
     private deleteData(): void {

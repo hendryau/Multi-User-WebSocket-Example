@@ -29,6 +29,12 @@ data {
 data > div {
     display: table-row;
 }
+
+data > label {
+    font-style: italic;
+    color: #a8a8a8;
+}
+
 data input, data label {
     display: table-cell;
     padding: 5px;
@@ -38,4 +44,8 @@ data input, data label {
 root > button {
     display: block;
     margin: 0 auto;
+}
+
+form {
+    display: inline-block;
 }
