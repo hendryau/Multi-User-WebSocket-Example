@@ -1,4 +1,9 @@
-import {Data, CmdUtil, MOCKED_DATA, Command, CreateCmd} from "./app/command";
+import {CommandUtil} from "./app/command/command-util";
+import {Command} from "./app/command/command";
+import {CreateCommand} from "./app/command/create.command";
+import {Data} from "./app/model/data";
+import {MOCKED_DATA} from "./app/model/mocked-data";
+import {SERVER_CONFIG} from "./app/server.config";
 
 class WebSocketServerWrapper {
 
@@ -7,9 +12,9 @@ class WebSocketServerWrapper {
             WebSocketServer = require("ws").Server,
             express = require("express"),
             app = express(),
-            port = 1502;
+            port = SERVER_CONFIG.port;
 
-        this.initWss(new WebSocketServer({server: server, perMessageDeflate: true}));
+        this.initWss(new WebSocketServer({server: server}));
 
         app.use(express.static(__dirname));
         server.on("request", app);
@@ -24,7 +29,7 @@ class WebSocketServerWrapper {
 
     private initWss(wss: any): void {
         wss.on("connection", (ws: any) => {
-            console.log("Socket opened.", this.sockets.length+1, "open WebSockets.");
+            console.log("Socket opened.", this.sockets.length+1, " WebSockets open.");
             this.initSocket(ws);
         });
     }
@@ -33,7 +38,7 @@ class WebSocketServerWrapper {
         this.sockets.push(ws);
 
         ws.on("close", () => {
-            console.log("Socket closed.", this.sockets.length, "open WebSockets.");
+            console.log("Socket closed.", this.sockets.length-1, " WebSockets open.");
             this.sockets.splice(this.sockets.indexOf(ws), 1);
         });
 
@@ -42,9 +47,9 @@ class WebSocketServerWrapper {
 
             let cmdJson: any = JSON.parse(msg);
 
-            let cmd: Command = CmdUtil.fromJson(cmdJson);
+            let cmd: Command = CommandUtil.fromJson(cmdJson);
 
-            if (cmd.cmdType === "CREATE") {
+            if (cmd.cmdType === CreateCommand.CREATE) {
                 cmd.data.id = this.idCounter++;
             }
 
@@ -56,7 +61,7 @@ class WebSocketServerWrapper {
         });
 
         this.dataArr.forEach(d => {
-            ws.send(JSON.stringify(new CreateCmd(d)))
+            ws.send(JSON.stringify(new CreateCommand(d)))
         });
     }
 

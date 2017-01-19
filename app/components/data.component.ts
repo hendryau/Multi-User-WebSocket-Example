@@ -1,6 +1,8 @@
 import {Component, Input} from "@angular/core";
-import {Data, DeleteCmd, UpdateCmd} from "../command";
 import {WebSocketService} from "../services/web-socket.service";
+import {Data} from "../model/data";
+import {DeleteCommand} from "../command/delete.command";
+import {UpdateCommand} from "../command/update.command";
 
 @Component({
     selector: "data",
@@ -8,7 +10,7 @@ import {WebSocketService} from "../services/web-socket.service";
         <label>id: {{data.id}}</label>
         
         <form (ngSubmit)="addField()">
-            <input name="newField" type="text" [(ngModel)]="newField" placeholder="field name">
+            <input name="newField" type="text" [(ngModel)]="newField" placeholder="field name" required>
             <button type="submit">Add Field</button>
         </form>
         
@@ -33,11 +35,11 @@ export class DataComponent {
     }
 
     private deleteData(): void {
-        this.webSocketService.send(JSON.stringify(new DeleteCmd(this.data)));
+        this.webSocketService.send(JSON.stringify(new DeleteCommand(this.data)));
     }
 
     private updateData(): void {
-        this.webSocketService.send(JSON.stringify(new UpdateCmd(this.data)));
+        this.webSocketService.send(JSON.stringify(new UpdateCommand(this.data)));
     }
 
     private addField(): void {
