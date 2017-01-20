@@ -18,7 +18,7 @@ class WebSocketServerWrapper {
 
         app.use(express.static(__dirname));
         server.on("request", app);
-        server.listen(port, () => console.log("Listening on " + server.address().port + "..."));
+        server.listen(port, () => console.log("Listening on", server.address().port + "..."));
     }
 
     private sockets: any[] = [];
@@ -29,7 +29,7 @@ class WebSocketServerWrapper {
 
     private initWss(wss: any): void {
         wss.on("connection", (ws: any) => {
-            console.log("Socket opened.", this.sockets.length+1, " WebSockets open.");
+            console.log("Socket opened.", this.sockets.length+1, "WebSockets open.");
             this.initSocket(ws);
         });
     }
@@ -38,7 +38,7 @@ class WebSocketServerWrapper {
         this.sockets.push(ws);
 
         ws.on("close", () => {
-            console.log("Socket closed.", this.sockets.length-1, " WebSockets open.");
+            console.log("Socket closed.", this.sockets.length-1, "WebSockets open.");
             this.sockets.splice(this.sockets.indexOf(ws), 1);
         });
 
